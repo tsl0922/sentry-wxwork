@@ -1,5 +1,6 @@
 # coding: utf-8
 import logging
+from datetime import datetime, timedelta
 from collections import defaultdict
 
 from django import forms
@@ -11,6 +12,7 @@ from sentry.utils import json
 from sentry.utils.safe import safe_execute
 from sentry.utils.forms import form_to_config
 from sentry.integrations import FeatureDescription, IntegrationFeatures
+from sentry.exceptions import PluginError
 
 from . import __version__, __doc__ as package_doc
 
@@ -87,6 +89,8 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
         )
     ]
 
+    access_token = None
+
     def is_configured(self, project, **kwargs):
         return bool(self.get_option('api_secret', project) and self.get_option('corp_id', project) and self.get_option('agent_id', project))
 
@@ -97,11 +101,22 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
 
         return form_to_config(form)
 
-    def get_token(self, api_origin, api_secret, corp_id):
+    def request_token(self, api_origin, api_secret, corp_id):
         url = '%s/gettoken?corpid=%s&corpsecret=%s' % (api_origin, corp_id, api_secret)
         response = safe_urlopen(url)
         self.logger.debug('Response code: %s, content: %s' % (response.status_code, response.content))
         return json.loads(response.content)
+
+    def get_token(self, api_origin, api_secret, corp_id):
+        if (not self.access_token) or self.access_token['expires'] < datetime.now():
+            data = self.request_token(api_origin, api_secret, corp_id)
+            if data['errcode'] != 0:
+                raise PluginError("invalid wechat token response: %s" % data)
+            self.access_token = {
+                'token': data['access_token'],
+                'expires': datetime.now() + timedelta(seconds = data['expires_in'])
+            }
+        return self.access_token['token']
 
     def build_message(self, group, event):
         the_tags = defaultdict(lambda: '[NA]')
@@ -133,9 +148,9 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
         
         token = self.get_token(api_origin, api_secret, corp_id)
 
-        return '%s/message/send?access_token=%s' % (api_origin, token['access_token'])
+        return '%s/message/send?access_token=%s' % (api_origin, token)
 
-    def send_message(self, url, payload, project):
+    def send_message(self, payload, project):
         to_user = self.get_option('to_user', project)
         to_party = self.get_option('to_party', project)
         to_tag = self.get_option('to_tag', project)
@@ -148,20 +163,18 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
             payload['totag'] = to_tag
 
         self.logger.debug('Sending message to user: %s, party: %s, tag: %s ' % (to_user, to_party, to_tag))
-        response = safe_urlopen(
-            method='POST',
-            url=url,
-            json=payload,
-        )
+        response = safe_urlopen(method='POST', url=self.build_url(project), json=payload)
         self.logger.debug('Response code: %s, content: %s' % (response.status_code, response.content))
+
+        data = json.loads(response.content)
+        if data['errcode'] == 40014 or data['errcode'] == 42001: # access token invalid or expired, retry
+            self.access_token = None
+            safe_urlopen(method='POST', url=self.build_url(project), json=payload)
 
     def notify_users(self, group, event, fail_silently=False, **kwargs):
         self.logger.debug('Received notification for event: %s' % event)
 
         payload = self.build_message(group, event)
         self.logger.debug('Built payload: %s' % payload)
-
-        url = self.build_url(group.project)
-        self.logger.debug('Built url: %s' % url)
         
-        safe_execute(self.send_message, url, payload, group.project, _with_transaction=False)
+        safe_execute(self.send_message, payload, group.project, _with_transaction=False)
