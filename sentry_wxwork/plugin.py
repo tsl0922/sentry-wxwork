@@ -7,7 +7,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from sentry.plugins.bases import notify
-from sentry.http import safe_urlopen, safe_urlread
+from sentry.http import safe_urlopen
 from sentry.utils import json
 from sentry.utils.safe import safe_execute
 from sentry.utils.forms import form_to_config

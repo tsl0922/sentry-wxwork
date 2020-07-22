@@ -10,7 +10,7 @@ with open('README.md', 'r') as f:
 setup(
     name='sentry_wxwork',
     version=__version__,
-    packages=['sentry_wxwork'],
+    packages=['sentry_wxwork', 'auth_wxwork'],
     url='https://github.com/tsl0922/sentry-wxwork',
     author='Shuanglei Tao',
     author_email='tsl0922@gmail.com',
@@ -19,6 +19,9 @@ setup(
     long_description_content_type='text/markdown',
     license='MIT',
     entry_points={
+        'sentry.apps': [
+            'auth_wxwork = auth_wxwork',
+         ],
         'sentry.plugins': [
             'sentry_wxwork = sentry_wxwork.plugin:WxworkNotificationsPlugin',
         ],
