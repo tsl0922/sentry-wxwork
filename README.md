@@ -1,4 +1,4 @@
-# Sentry WeChat Work
+# Sentry WeChat Work [![pypi](https://badge.fury.io/py/sentry-wxwork.svg)](https://pypi.python.org/pypi/sentry-wxwork)
 
 Plugin for [Sentry](https://github.com/getsentry/sentry) which allows sending notification and SSO Login via [WeChat Work](https://work.weixin.qq.com).
 
@@ -33,3 +33,4 @@ if 'WXWORK_CORP_ID' in os.environ:
     WXWORK_SECRET = env('WXWORK_SECRET')
     WXWORK_AGENT_ID = env('WXWORK_AGENT_ID')
 ```
+
