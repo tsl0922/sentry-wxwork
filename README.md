@@ -1,6 +1,6 @@
 # Sentry WeChat Work
 
-Plugin for Sentry which allows sending notification and SSO Login via WeChat Work.
+Plugin for [Sentry](https://github.com/getsentry/sentry) which allows sending notification and SSO Login via [WeChat Work](https://work.weixin.qq.com).
 
 ## Installation
 
