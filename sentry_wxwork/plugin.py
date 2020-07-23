@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from sentry.plugins.bases import notify
@@ -25,15 +26,18 @@ class WxworkNotificationsOptionsForm(notify.NotificationConfigurationForm):
     )
     api_secret = forms.CharField(
         label=_('API secret'),
-        widget=forms.TextInput(attrs={'placeholder': 'vQT_03RDVA3uE6JDASDASDAiXUvccqV8mDgLdLI'})
+        widget=forms.PasswordInput(attrs={'placeholder': 'vQT_03RDVA3uE6JDASDASDAiXUvccqV8mDgLdLI'}),
+        initial=getattr(settings, 'WXWORK_SECRET', None)
     )
     corp_id = forms.CharField(
         label=_('Corp ID'),
-        widget=forms.TextInput(attrs={'placeholder': 'wwabcddzxdkrsdv'})
+        widget=forms.TextInput(attrs={'placeholder': 'wwabcddzxdkrsdv'}),
+        initial=getattr(settings, 'WXWORK_CORP_ID', None)
     )
     agent_id = forms.CharField(
         label=_('Agent ID'),
-        widget=forms.TextInput(attrs={'placeholder': '1'})
+        widget=forms.TextInput(attrs={'placeholder': '1'}),
+        initial=getattr(settings, 'WXWORK_AGENT_ID', None)
     )
     to_user = forms.CharField(
         label=_('Receivers: user list'),
