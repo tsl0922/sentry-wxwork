@@ -6,13 +6,10 @@ Plugin for [Sentry](https://github.com/getsentry/sentry) which allows sending no
 
 ### Prepare
 
-Install the plugin:
-
-```
-pip install sentry-wxwork
-```
-
-Obtain required config from WeChat Work admin console ([Read Me](https://work.weixin.qq.com/api/doc/90000/90135/90664)).
+- Install the plugin:
+    - [onpremise](https://github.com/getsentry/onpremise): put `sentry-wxwork` to `requirements.txt`
+    - manual: `pip install sentry-wxwork`
+- Obtain required config from WeChat Work admin console ([Read Me](https://work.weixin.qq.com/api/doc/90000/90135/90664)).
 
 ### Notification
 
