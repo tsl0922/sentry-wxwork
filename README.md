@@ -4,8 +4,6 @@ Plugin for [Sentry](https://github.com/getsentry/sentry) which allows sending no
 
 ## Installation
 
-> NOTE: sentry > 9.1.2 is not supported.
-
 ### Prepare
 
 Install the plugin:
@@ -24,7 +22,7 @@ On (Legacy) Integrations page, find `WeChat Work`, enable and configure it.
 
 Add the following settings to your `sentry.conf.py`:
 
-```
+```python
 WXWORK_CORP_ID = ''
 WXWORK_SECRET = ''
 WXWORK_AGENT_ID = ''
@@ -32,7 +30,7 @@ WXWORK_AGENT_ID = ''
 
 or, if you prefer setting it via environment variables:
 
-```
+```python
 if 'WXWORK_CORP_ID' in os.environ:
     WXWORK_CORP_ID = env('WXWORK_CORP_ID')
     WXWORK_SECRET = env('WXWORK_SECRET')
