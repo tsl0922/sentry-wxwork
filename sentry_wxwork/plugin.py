@@ -134,6 +134,8 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
         template = self.get_option('message_template', group.project)
 
         text = template.format(**names)
+        if len(text) > 2048:
+            text = text[:2048]
 
         return {
             'msgtype': 'markdown',
