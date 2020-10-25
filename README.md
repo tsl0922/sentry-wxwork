@@ -1,4 +1,4 @@
-# Sentry WeChat Work [![pypi](https://badge.fury.io/py/sentry-wxwork.svg)](https://pypi.python.org/pypi/sentry-wxwork)
+# Sentry WeChat Work [![pypi](https://badge.fury.io/py/sentry-wxwork.svg)](https://pypi.python.org/pypi/sentry-wxwork) [![Downloads](https://pepy.tech/badge/sentry-wxwork)](https://pepy.tech/project/sentry-wxwork)
 
 Plugin for [Sentry](https://github.com/getsentry/sentry) which allows sending notification and SSO Login via [WeChat Work](https://work.weixin.qq.com).
 
