@@ -4,6 +4,8 @@ Plugin for [Sentry](https://github.com/getsentry/sentry) which allows sending no
 
 ## Installation
 
+> **NOTE:** sentry 20.x removed support for legacy plugins, so this plugin only works for sentry 9.x-10.x.
+
 ### Prepare
 
 - Install the plugin:
