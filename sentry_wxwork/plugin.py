@@ -57,6 +57,12 @@ class WxworkNotificationsOptionsForm(notify.NotificationConfigurationForm):
         help_text=_('NOTE: user, party, tag list can not be empty at the same time'),
         required=False
     )
+    to_webhook = forms.CharField(
+        label=_('Robot: webhook url'),
+        widget=forms.TextInput(attrs={'placeholder': 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=693a91f6-7xxx-4bc4-97a0-0ec2sifa5aaa'}),
+        help_text=_('This will also send the notification to the group robot'),
+        required=False
+    )
     message_template = forms.CharField(
         label=_('Message template'),
         widget=forms.Textarea(attrs={'class': 'span4'}),
@@ -132,14 +138,12 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
         }
 
         template = self.get_option('message_template', group.project)
-
         text = template.format(**names)
         if len(text) > 2048:
-            text = text[:2048]
+            text = text[:2045] + '...'
 
         return {
             'msgtype': 'markdown',
-            'agentid': self.get_option('agent_id', group.project),
             'markdown': {
                 'content': text
             }
@@ -154,10 +158,13 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
 
         return '%s/message/send?access_token=%s' % (api_origin, token)
 
+    # https://work.weixin.qq.com/api/doc/90000/90135/90236
     def send_message(self, payload, project):
         to_user = self.get_option('to_user', project)
         to_party = self.get_option('to_party', project)
         to_tag = self.get_option('to_tag', project)
+
+        payload['agentid'] = self.get_option('agent_id', project)
 
         if to_user:
             payload['touser'] = to_user
@@ -175,10 +182,20 @@ class WxworkNotificationsPlugin(notify.NotificationPlugin):
             self.access_token = None
             safe_urlopen(method='POST', url=self.build_url(project), json=payload)
 
+    # https://work.weixin.qq.com/api/doc/90000/90136/91770
+    def send_webhook(self, payload, webhook, project):
+        self.logger.debug('Sending webhook to url: %s ' % webhook)
+        response = safe_urlopen(method='POST', url=webhook, json=payload)
+        self.logger.debug('Response code: %s, content: %s' % (response.status_code, response.content))
+
     def notify_users(self, group, event, fail_silently=False, **kwargs):
         self.logger.debug('Received notification for event: %s' % event)
 
+        project = group.project
         payload = self.build_message(group, event)
         self.logger.debug('Built payload: %s' % payload)
-        
         safe_execute(self.send_message, payload, group.project, _with_transaction=False)
+
+        to_webhook = self.get_option('to_webhook', project)
+        if to_webhook:
+            safe_execute(self.send_webhook, payload, to_webhook, project, _with_transaction=False)
