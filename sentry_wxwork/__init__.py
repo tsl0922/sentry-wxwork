@@ -3,4 +3,4 @@
 Plugin for Sentry which allows sending notification via WeChat Work.
 """
 
-__version__ = '1.1.1'
+__version__ = '1.2.0'
